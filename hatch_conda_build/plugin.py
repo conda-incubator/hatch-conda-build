@@ -1,5 +1,5 @@
 import json
-import tomllib
+# import tomli
 import shutil
 import typing
 import pathlib
@@ -25,43 +25,75 @@ def normalize_pypi_packages(packages: typing.List[str]):
     return _packages
 
 
-def construct_meta_yaml_from_pyproject(metadata):
+def construct_meta_yaml_from_pyproject(metadata, target_config):
     py_meta = metadata.core_raw_metadata
     conda_meta = collections.defaultdict(dict)
 
-    # package
+    from grayskull.strategy.py_base import merge_setup_toml_metadata
+    from grayskull.strategy.py_toml import get_all_toml_info
+    from souschef.recipe import Recipe
+    from grayskull.config import Configuration
+    from grayskull.strategy.pypi import extract_requirements, extract_optional_requirements, normalize_requirements_list
+    from grayskull.strategy.pypi import merge_pypi_sdist_metadata
+
+    # python -c 'import build.util; build.util.project_wheel_metadata('.', isolated=True)['Version"]'
+    pyproject_toml = pathlib.Path(metadata._project_file)
+
+    # import build.util
+    # wheel_metadata = build.util.project_wheel_metadata(pyproject_toml.parent, isolated=False)
+
     conda_meta["package"]["name"] = metadata.name
     conda_meta["package"]["version"] = metadata.version
 
+    recipe = Recipe(name=metadata.name, version=metadata.version)
+    config = Configuration(name=metadata.name, version=metadata.version, from_local_sdist=True)
+
     # source
-    pyproject_toml = pathlib.Path(metadata._project_file)
+    full_metadata = get_all_toml_info(pyproject_toml)
+    merged = merge_setup_toml_metadata({}, full_metadata)
+    merged2 = merge_pypi_sdist_metadata({}, merged, config)
+
+    reqs = extract_requirements(merged2, config, recipe)
+
+    for key in reqs:
+        reqs[key] = normalize_requirements_list(reqs[key], config)
+
+    # package
+
     conda_meta["source"]["path"] = str(pyproject_toml.parent)
-    with pyproject_toml.open("rb") as f:
-        full_metadata = tomllib.load(f)
+    # with pyproject_toml.open("rb") as f:
+    #     full_metadata = tomli.load(f)
 
     # build
     conda_meta["build"]["number"] = 0
     conda_meta["build"]["noarch"] = "python"
     conda_meta["build"][
         "script"
-    ] = "python -m pip install --no-deps --ignore-installed ."
+    ] = "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv"
 
     # requirements
-    if "requires-python" in py_meta:
-        python_spec = f"python {py_meta['requires-python']}"
-    else:
-        python_spec = "python"
+    # if "requires-python" in py_meta:
+    #     python_spec = f"python {py_meta['requires-python']}"
+    # else:
+    #     python_spec = "python"
 
     conda_meta["requirements"]["build"] = []
 
-    conda_meta["requirements"]["host"] = [
-        python_spec,
-        "pip",
-    ] + normalize_pypi_packages(full_metadata["build-system"]["requires"])
+    # conda_meta["requirements"]["host"] = [
+    #     python_spec,
+    #     "pip",
+    # ] + normalize_pypi_packages(full_metadata["build-system"]["requires"])
 
-    conda_meta["requirements"]["run"] = [
-        python_spec,
-    ] + py_meta["dependencies"]
+    # this is a local method to drop
+    conda_meta["requirements"]["host"] = normalize_pypi_packages(reqs["host"])
+
+    # conda_meta["requirements"]["run"] = [
+    #     python_spec,
+    # ] + py_meta["dependencies"]
+    conda_run_deps = target_config.get("run", [])
+    conda_meta["requirements"]["run"] = reqs["run"] + conda_run_deps
+
+    conda_meta["requirements"]["run_constrained"] = target_config.get("run_constrained", [])
 
     # test
     conda_meta["test"] = {}
@@ -89,7 +121,7 @@ def conda_build(
         json.dump(meta_config, f)
 
     command = [
-        "conda-build",
+        "conda",
         "build",
         str(build_directory),
         "--output-folder",
@@ -120,14 +152,14 @@ class CondaBuilder(BuilderInterface):
     def get_version_api(self) -> typing.Dict:
         return {"standard": self.build_standard}
 
-    def clean(directory: str, versions: typing.List[str]):
+    def clean(self, directory: str, versions: typing.List[str]):
         shutil.rmtree(directory)
 
     def build_standard(self, directory: str, **build_data: typing.Dict) -> str:
-        directory = pathlib.Path(directory)
+        directory = pathlib.Path(directory) / "conda"
 
-        conda_meta = construct_meta_yaml_from_pyproject(self.metadata)
         target_config = self.build_config.get("targets", {}).get("conda", {})
+        conda_meta = construct_meta_yaml_from_pyproject(self.metadata, target_config)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = pathlib.Path(tmpdir)
@@ -135,13 +167,14 @@ class CondaBuilder(BuilderInterface):
             conda_build_filename = conda_build(
                 conda_meta,
                 build_directory=tmpdir,
-                output_directory=tmpdir,
-                channels=target_config.get("channels", ["conda-forge"]),
+                output_directory=directory,
+                channels=target_config.get("channels", ["defaults"]),
                 default_numpy_version=target_config.get(
                     "default_numpy_version", "1.22"
                 ),
             )
-            shutil.copy2(conda_build_filename, directory / conda_build_filename.name)
+            # shutil.copy2(conda_build_filename, directory / conda_build_filename.name)
+            # subprocess.run(["conda", "index", directory])
 
         return str(directory)
 

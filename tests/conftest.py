@@ -37,6 +37,7 @@ build-backend = "hatchling.build"
 name = "project-a"
 version = "0.1.0"
 description = "A description"
+requires-python = ">=3.8"
 dependencies = {json.dumps(dependencies)}
 
 [project.urls]
@@ -59,3 +60,4 @@ channels = ["conda-forge"]
         return project_dir
 
     return _new_project
+
