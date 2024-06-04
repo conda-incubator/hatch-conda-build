@@ -15,6 +15,9 @@ build-backend = "hatchling.build"
 Additionally `conda-build` must be in your current path when running a
 hatch build.
 
+`hatch-conda-build` uses [grayskull](https://github.com/conda/grayskull) to translate the requirements section of your `pyproject.toml`, which
+specifies dependencies on PyPi to appropriate conda package names.
+
 ### Options
 
 Additional builder configuration can be set in the following toml
