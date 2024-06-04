@@ -1,5 +1,7 @@
 from pathlib import Path
+from textwrap import dedent
 from hatch_conda_build.plugin import CondaBuilder
+from pytest_mock import MockerFixture
 
 
 def test_requires_python(project_factory):
@@ -48,6 +50,34 @@ def test_recipe(project_factory):
     assert recipe["requirements"]["run"] == ["python >=3.8", "requests"]
     assert recipe["about"]["home"] == "https://example.org"
     assert recipe["about"]["summary"] == "A description"
+
+
+def test_custom_channels(project_factory, mocker: MockerFixture):
+    conda_build = mocker.patch("hatch_conda_build.plugin.conda_build")
+
+    target_config = dedent("""\
+        [tool.hatch.build.targets.conda]
+        channels = ["defaults", "bioconda"]
+    """)
+    project = project_factory(
+        conda_target_config=target_config
+    )
+
+    builder = CondaBuilder(root=project)
+    builder.build_standard(project / "dist")
+
+    assert conda_build.call_args.kwargs.get("channels", []) == ["defaults", "bioconda"]
+
+
+def test_channels(project_factory, mocker: MockerFixture):
+    conda_build = mocker.patch("hatch_conda_build.plugin.conda_build")
+
+    project = project_factory()
+
+    builder = CondaBuilder(root=project)
+    builder.build_standard(project / "dist")
+
+    assert conda_build.call_args.kwargs.get("channels", []) == ["conda-forge"]
 
 
 def test_noarch_build(project_factory):

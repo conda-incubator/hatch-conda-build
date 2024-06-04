@@ -4,6 +4,7 @@ from hatchling.metadata.core import ProjectMetadata
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
+from typing import Optional
 
 import pytest
 
@@ -24,33 +25,33 @@ def project_factory(tmp_path, plugin_dir):
         package_name: str = "project_a",
         version: str = "0.1.0",
         dependencies: list[str] = ["requests"],
-        requires_python: str = ">=3.8"
+        requires_python: str = ">=3.8",
+        conda_target_config: Optional[str] = None
     ) -> ProjectMetadata:
         project_dir = tmp_path / name
         project_dir.mkdir()
 
+        toml = dedent(f"""\
+            [build-system]
+            requires = ["hatchling", "hatch-conda-build @ {plugin_dir.as_uri()}"]
+            build-backend = "hatchling.build"
+
+            [project]
+            name = "{name}"
+            version = "{version}"
+            description = "A description"
+            requires-python = "{requires_python}"
+            dependencies = {json.dumps(dependencies)}
+
+            [project.urls]
+            homepage = "https://example.org"
+            """)
+
+        if conda_target_config is not None:
+            toml += conda_target_config
+
         project_file = project_dir / "pyproject.toml"
-        project_file.write_text(
-            dedent(f"""\
-                [build-system]
-                requires = ["hatchling", "hatch-conda-build @ {plugin_dir.as_uri()}"]
-                build-backend = "hatchling.build"
-
-                [project]
-                name = "{name}"
-                version = "{version}"
-                description = "A description"
-                requires-python = "{requires_python}"
-                dependencies = {json.dumps(dependencies)}
-
-                [project.urls]
-                homepage = "https://example.org"
-
-                [tool.hatch.build.targets.conda]
-                channels = ["conda-forge"]
-            """),
-            encoding="utf-8",
-        )
+        project_file.write_text(toml, encoding="utf-8")
 
         package_dir = project_dir / "src" / package_name
         package_dir.mkdir(parents=True)

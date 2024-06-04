@@ -29,6 +29,7 @@ dependencies = [
   "ruff",
   "black",
   "pytest",
+  "pytest-mock"
 ]
 
 [tool.hatch.envs.test.scripts]
