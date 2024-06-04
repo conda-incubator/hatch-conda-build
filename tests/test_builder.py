@@ -1,34 +1,27 @@
-import pytest
-# from hatchling.builders.plugin.interface import IncludedFile
-from hatchling.metadata.core import ProjectMetadata
-
-from hatch_conda_build.plugin import CondaBuilder
+from hatch_conda_build.plugin import CondaBuilder, construct_meta_yaml_from_pyproject
 
 
-@pytest.fixture
-def conda_builder(new_project):
-    hatch_config = {
-        "build": {
-            "targets": {
-                "conda": {"install-name": "project-a"}
-            },
-        },
-    }
-    config = {
-        "project": {"name": "project-a", "version": "0.1.0"},
-        "tool": {
-            "hatch": hatch_config,
-        },
-    }
-    project_root = new_project(name="project-a", package_name="project_a", version="0.1.0",
-                               dependencies=["requests", "Flask", "build", "art", "pydantic[email]<2"])
+def test_requires_python(project_metadata_factory):
+    metadata = project_metadata_factory(requires_python=">=3.10")
+    builder = CondaBuilder(metadata.root, metadata=metadata)
 
-    metadata = ProjectMetadata(project_root, None, config=config)
-
-    builder = CondaBuilder(project_root, metadata=metadata)
-    return builder
+    recipe = construct_meta_yaml_from_pyproject(metadata, builder.config.target_config)
+    assert "python >=3.10" in recipe["requirements"]["run"]
 
 
-def test_conda_build(conda_builder):
-    conda_builder.build_standard(directory=conda_builder.config.directory)
-    assert conda_builder
+def test_pypi_conversion(project_metadata_factory):
+    metadata = project_metadata_factory(
+        name="project-a", package_name="project_a", version="0.1.0",
+        dependencies=["requests", "Flask", "build", "art", "pydantic[email]<2"])
+
+    builder = CondaBuilder(metadata.root, metadata=metadata)
+    recipe = construct_meta_yaml_from_pyproject(metadata, builder.config.target_config)
+
+    assert recipe["requirements"]["run"] == [
+        'python >=3.8',
+        'requests',
+        'flask',
+        'python-build',
+        'ascii-art',
+        'pydantic <2'
+    ]

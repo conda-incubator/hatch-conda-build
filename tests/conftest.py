@@ -1,7 +1,9 @@
 import json
 import shutil
+from hatchling.metadata.core import ProjectMetadata
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from textwrap import dedent
 
 import pytest
 
@@ -10,42 +12,43 @@ import pytest
 def plugin_dir():
     with TemporaryDirectory() as d:
         directory = Path(d, "plugin")
-        shutil.copytree(Path.cwd(), directory, ignore=shutil.ignore_patterns(".git"))
+        shutil.copytree(Path.cwd(), directory, ignore=shutil.ignore_patterns(".git", "env"))
 
         yield directory.resolve()
 
 
 @pytest.fixture
-def new_project(tmp_path, monkeypatch, plugin_dir):
+def project_metadata_factory(tmp_path, plugin_dir):
     def _new_project(
         name: str = "project-a",
         package_name: str = "project_a",
         version: str = "0.1.0",
         dependencies: list[str] = ["requests"],
-    ):
+        requires_python: str = ">=3.8"
+    ) -> ProjectMetadata:
         project_dir = tmp_path / name
         project_dir.mkdir()
 
         project_file = project_dir / "pyproject.toml"
         project_file.write_text(
-            f"""\
-[build-system]
-requires = ["hatchling", "hatch-conda-build @ {plugin_dir.as_uri()}"]
-build-backend = "hatchling.build"
+            dedent(f"""\
+                [build-system]
+                requires = ["hatchling", "hatch-conda-build @ {plugin_dir.as_uri()}"]
+                build-backend = "hatchling.build"
 
-[project]
-name = "project-a"
-version = "0.1.0"
-description = "A description"
-requires-python = ">=3.8"
-dependencies = {json.dumps(dependencies)}
+                [project]
+                name = "{name}"
+                version = "{version}"
+                description = "A description"
+                requires-python = "{requires_python}"
+                dependencies = {json.dumps(dependencies)}
 
-[project.urls]
-homepage = "https://example.org"
+                [project.urls]
+                homepage = "https://example.org"
 
-[tool.hatch.build.targets.conda]
-channels = ["conda-forge"]
-    """,
+                [tool.hatch.build.targets.conda]
+                channels = ["conda-forge"]
+            """),
             encoding="utf-8",
         )
 
@@ -53,11 +56,10 @@ channels = ["conda-forge"]
         package_dir.mkdir(parents=True)
 
         package_root = package_dir / "__init__.py"
-        package_root.write_text("")
+        package_root.write_text(f"__version__ = {version}\n")
 
-        monkeypatch.chdir(project_dir)
+        metadata = ProjectMetadata(project_dir, None)
 
-        return project_dir
+        return metadata
 
     return _new_project
-
