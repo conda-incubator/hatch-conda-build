@@ -6,6 +6,7 @@ import pathlib
 import collections
 import tempfile
 import subprocess
+from pathlib import Path
 from typing import Optional
 
 from hatchling.builders.plugin.interface import BuilderInterface
@@ -81,7 +82,8 @@ class CondaBuilder(BuilderInterface):
         return {"standard": self.build_standard}
 
     def clean(self, directory: str, versions: typing.List[str]):
-        shutil.rmtree(directory)
+        builds = Path(directory) / "conda"
+        shutil.rmtree(builds)
 
     def _get_requirements(self):
         """Use grayskull to extract requirements and transform to conda"""
