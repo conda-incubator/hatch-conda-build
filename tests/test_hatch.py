@@ -10,9 +10,9 @@ def hatch_build_target(target: str) -> None:
 
 
 @pytest.mark.slow()
-def test_build(project_metadata_factory, monkeypatch: MonkeyPatch) -> None:
-    metadata = project_metadata_factory(name="project-a", version="0.1.0", dependencies=["requests"])
+def test_build(project_factory, monkeypatch: MonkeyPatch) -> None:
+    project = project_factory(name="project-a", package_name="project_a", version="0.1.0", dependencies=["requests"])
 
-    monkeypatch.chdir(metadata.root)
+    monkeypatch.chdir(project)
 
     hatch_build_target("conda")

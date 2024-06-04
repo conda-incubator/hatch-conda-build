@@ -18,7 +18,7 @@ def plugin_dir():
 
 
 @pytest.fixture
-def project_metadata_factory(tmp_path, plugin_dir):
+def project_factory(tmp_path, plugin_dir):
     def _new_project(
         name: str = "project-a",
         package_name: str = "project_a",
@@ -55,11 +55,9 @@ def project_metadata_factory(tmp_path, plugin_dir):
         package_dir = project_dir / "src" / package_name
         package_dir.mkdir(parents=True)
 
-        package_root = package_dir / "__init__.py"
-        package_root.write_text(f"__version__ = {version}\n")
+        package_init = package_dir / "__init__.py"
+        package_init.write_text(f"__version__ = '{version}'\n")
 
-        metadata = ProjectMetadata(project_dir, None)
-
-        return metadata
+        return project_dir
 
     return _new_project
