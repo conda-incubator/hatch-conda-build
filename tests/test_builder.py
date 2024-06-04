@@ -1,3 +1,4 @@
+import pytest
 from pathlib import Path
 from textwrap import dedent
 from hatch_conda_build.plugin import CondaBuilder
@@ -80,6 +81,24 @@ def test_channels(project_factory, mocker: MockerFixture):
     assert conda_build.call_args.kwargs.get("channels", []) == ["conda-forge"]
 
 
+def test_numpy_version(project_factory, mocker: MockerFixture):
+    conda_build = mocker.patch("hatch_conda_build.plugin.conda_build")
+
+    target_config = dedent("""\
+        [tool.hatch.build.targets.conda]
+        default_numpy_version = "1.20"
+    """)
+    project = project_factory(
+        conda_target_config=target_config
+    )
+
+    builder = CondaBuilder(root=project)
+    builder.build_standard(project / "dist")
+
+    assert conda_build.call_args.kwargs.get("default_numpy_version", "") == "1.20"
+
+
+@pytest.mark.slow()
 def test_noarch_build(project_factory):
     project = project_factory()
 
