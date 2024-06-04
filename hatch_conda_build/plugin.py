@@ -121,7 +121,7 @@ class CondaBuilder(BuilderInterface):
         conda_meta["build"] = {
             "number": 0,
             "noarch": "python",
-            "script": "{{ PYTHON }} -m pip install --no-deps --ignore-installed . -vv"
+            "script": "{{ PYTHON }} -m pip install --no-build-isolation --no-deps --ignore-installed -vv ."
         }
 
         # requirements

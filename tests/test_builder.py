@@ -43,6 +43,7 @@ def test_recipe(project_factory):
     assert recipe["source"]["path"] == str(project)
     assert recipe["build"]["noarch"] == "python"
     assert recipe["build"]["number"] == 0
+    assert "--no-build-isolation" in recipe["build"]["script"]
     assert recipe["requirements"]["host"] == ["python >=3.8", "hatchling", "pip"]
     assert recipe["requirements"]["run"] == ["python >=3.8", "requests"]
     assert recipe["about"]["home"] == "https://example.org"
