@@ -25,12 +25,13 @@ header.
 ...
 ```
 
-Following table contains available customization of builder behavior. 
+Following table contains available customization of builder behavior.
 
-| Option                | Type      | Default         | Description                                 |
-|:----------------------|:----------|:----------------|:--------------------------------------------|
-| channels              | list[str] | ['conda-forge'] | Channels used for package build and testing |
-| default_numpy_version | str       | "1.22"          | Default numpy version for build             |
+| Option                | Type      | Default         | Description                                      |
+|:----------------------|:----------|:----------------|:-------------------------------------------------|
+| channels              | list[str] | ['conda-forge'] | Channels used for package build and testing      |
+| default_numpy_version | str       | None            | numpy version, otherwise use conda-build default |
+
 
 ## Building Conda Package
 
