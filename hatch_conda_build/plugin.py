@@ -7,7 +7,7 @@ import collections
 import tempfile
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from hatchling.builders.plugin.interface import BuilderInterface
 
@@ -40,6 +40,7 @@ def conda_build(
     output_directory: pathlib.Path,
     channels: typing.List[str],
     default_numpy_version: Optional[str] = None,
+    extra_args: Optional[List[str]] = None
 ):
     conda_meta_filename = build_directory / "meta.yaml"
     with conda_meta_filename.open("w") as f:
@@ -53,6 +54,9 @@ def conda_build(
         str(output_directory),
         "--override-channels",
     ]
+
+    if extra_args is not None:
+        command.extend(extra_args)
 
     if default_numpy_version is not None:
         command.extend(
@@ -150,7 +154,7 @@ class CondaBuilder(BuilderInterface):
                 conda_meta,
                 build_directory=tmpdir,
                 output_directory=conda_bld,
-                channels=self.target_config.get("channels", ["defaults"]),
+                channels=self.target_config.get("channels", ["conda-forge"]),
                 default_numpy_version=self.target_config.get(
                     "default_numpy_version", None
                 ),
