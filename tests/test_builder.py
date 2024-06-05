@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from textwrap import dedent
-from hatch_conda_build.plugin import CondaBuilder
+from hatch_conda_build.plugin import CondaBuilder, recipe_merger
 from pytest_mock import MockerFixture
 
 
@@ -73,7 +73,7 @@ def test_custom_channels(project_factory, mocker: MockerFixture):
     assert conda_build.call_args.kwargs.get("channels", []) == ["defaults", "bioconda"]
 
 
-def test_channels(project_factory, mocker: MockerFixture):
+def test_default_channels(project_factory, mocker: MockerFixture):
     conda_build = mocker.patch("hatch_conda_build.plugin.conda_build")
 
     project = project_factory()
@@ -91,7 +91,9 @@ def test_numpy_version(project_factory, mocker: MockerFixture):
         """\
         [tool.hatch.build.targets.conda]
         default_numpy_version = "1.20"
-    """
+    """)
+    project = project_factory(
+        more_toml=target_config
     )
     project = project_factory(conda_target_config=target_config)
 
@@ -99,6 +101,58 @@ def test_numpy_version(project_factory, mocker: MockerFixture):
     builder.build_standard(project / "dist")
 
     assert conda_build.call_args.kwargs.get("default_numpy_version", "") == "1.20"
+
+
+def test_recipe_merge():
+    recipe = {
+        "package": {
+            "name": "a-package",
+            "version": "0.1.0"
+        },
+
+        "requirements": {
+            "host": [
+                "python >=3.8",
+                "pip"
+            ],
+            "run": [
+                "python >=3.8",
+                "requests"
+            ]
+        }
+    }
+
+    extras = {
+        "requirements": {
+            "build": ["{{ compiler('c') }}"],
+            "run": ["anaconda-anon-usage"]
+        },
+        "test": {
+            "imports": ["a_package"]
+        }
+    }
+
+    recipe_merger.merge(recipe, extras)
+
+    assert recipe["requirements"]["run"] == ["python >=3.8", "requests", "anaconda-anon-usage"]
+    assert recipe["test"]["imports"] == ["a_package"]
+
+
+def test_recipe_extras(project_factory):
+    target_config = dedent("""\
+        [tool.hatch.build.targets.conda.recipe]
+        requirements.run = ["anaconda-anon-usage"]
+        test.imports = ["a_package"]
+    """)
+    project = project_factory(
+        more_toml=target_config
+    )
+
+    builder = CondaBuilder(root=project)
+    recipe = builder._construct_recipe()
+
+    assert recipe["requirements"]["run"] == ["python >=3.8", "requests", "anaconda-anon-usage"]
+    assert recipe["test"]["imports"] == ["a_package"]
 
 
 @pytest.mark.slow()
@@ -113,3 +167,4 @@ def test_noarch_build(project_factory):
     assert (package.parent / "repodata.json").exists()
     assert package.parent.name == "noarch"
     assert package.parent.parent.name == "conda"
+
