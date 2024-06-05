@@ -5,12 +5,13 @@ dynamic = ["version"]
 requires-python = ">=3.8"
 readme = "README.md"
 dependencies = [
-  "hatchling",
-  "ruamel.yaml",
-  "requests",
-  "grayskull",
-  "conda-souschef >=2.2.3",
-  "build"
+   "hatchling",
+   "ruamel.yaml",
+   "requests",
+   "grayskull",
+   "conda-souschef >=2.2.3",
+   "build",
+   "deepmerge"
 ]
 
 [build-system]
