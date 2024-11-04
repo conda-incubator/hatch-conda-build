@@ -13,7 +13,7 @@ import pytest
 def plugin_dir():
     with TemporaryDirectory() as d:
         directory = Path(d, "plugin")
-        shutil.copytree(Path.cwd(), directory, ignore=shutil.ignore_patterns(".git", "env"))
+        shutil.copytree(Path.cwd(), directory, ignore=shutil.ignore_patterns("env"))
 
         yield directory.resolve()
 
