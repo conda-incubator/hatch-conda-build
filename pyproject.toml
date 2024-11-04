@@ -43,8 +43,8 @@ dev = [
 ]
 
 [tool.hatch.envs.test]
-dependencies = [
-  "-e .[dev]"
+features = [
+  "dev"
 ]
 
 [tool.hatch.envs.test.scripts]
