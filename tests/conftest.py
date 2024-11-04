@@ -26,12 +26,13 @@ def project_factory(tmp_path, plugin_dir):
         version: str = "0.1.0",
         dependencies: list[str] = ["requests"],
         requires_python: str = ">=3.8",
-        conda_target_config: Optional[str] = None
+        conda_target_config: Optional[str] = None,
     ) -> ProjectMetadata:
         project_dir = tmp_path / name
         project_dir.mkdir()
 
-        toml = dedent(f"""\
+        toml = dedent(
+            f"""\
             [build-system]
             requires = ["hatchling", "hatch-conda-build @ {plugin_dir.as_uri()}"]
             build-backend = "hatchling.build"
@@ -45,7 +46,8 @@ def project_factory(tmp_path, plugin_dir):
 
             [project.urls]
             homepage = "https://example.org"
-            """)
+            """
+        )
 
         if conda_target_config is not None:
             toml += conda_target_config

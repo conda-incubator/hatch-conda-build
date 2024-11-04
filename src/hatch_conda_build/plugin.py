@@ -40,7 +40,7 @@ def conda_build(
     output_directory: pathlib.Path,
     channels: typing.List[str],
     default_numpy_version: Optional[str] = None,
-    extra_args: Optional[List[str]] = None
+    extra_args: Optional[List[str]] = None,
 ):
     conda_meta_filename = build_directory / "meta.yaml"
     with conda_meta_filename.open("w") as f:
@@ -92,10 +92,16 @@ class CondaBuilder(BuilderInterface):
     def _get_requirements(self):
         """Use grayskull to extract requirements and transform to conda"""
         recipe = Recipe(name=self.metadata.name, version=self.metadata.version)
-        config = Configuration(name=self.metadata.name, version=self.metadata.version, from_local_sdist=True)
+        config = Configuration(
+            name=self.metadata.name,
+            version=self.metadata.version,
+            from_local_sdist=True,
+        )
 
         # prepare requirements from pyproject.toml
-        assert self.metadata.has_project_file() and self.metadata._project_file is not None
+        assert (
+            self.metadata.has_project_file() and self.metadata._project_file is not None
+        )
         full_metadata = get_all_toml_info(self.metadata._project_file)
         merged = merge_setup_toml_metadata({}, full_metadata)
         merged2 = merge_pypi_sdist_metadata({}, merged, config)
@@ -127,7 +133,7 @@ class CondaBuilder(BuilderInterface):
         conda_meta["build"] = {
             "number": 0,
             "noarch": "python",
-            "script": "{{ PYTHON }} -m pip install --no-build-isolation --no-deps --ignore-installed -vv ."
+            "script": "{{ PYTHON }} -m pip install --no-build-isolation --no-deps --ignore-installed -vv .",
         }
 
         # requirements
@@ -137,8 +143,12 @@ class CondaBuilder(BuilderInterface):
         conda_meta["test"] = {}
 
         # about
-        conda_meta["about"]["home"] = self.metadata.core_raw_metadata.get("urls", {}).get("homepage")
-        conda_meta["about"]["summary"] = self.metadata.core_raw_metadata.get("description")
+        conda_meta["about"]["home"] = self.metadata.core_raw_metadata.get(
+            "urls", {}
+        ).get("homepage")
+        conda_meta["about"]["summary"] = self.metadata.core_raw_metadata.get(
+            "description"
+        )
 
         return conda_meta
 

@@ -16,20 +16,23 @@ def test_requires_python(project_factory):
 
 def test_pypi_conversion(project_factory):
     project = project_factory(
-        name="project-a", package_name="project_a", version="0.1.0",
+        name="project-a",
+        package_name="project_a",
+        version="0.1.0",
         requires_python=">=3.9",
-        dependencies=["requests==2.31.0", "Flask", "build", "art", "pydantic[email]<2"])
+        dependencies=["requests==2.31.0", "Flask", "build", "art", "pydantic[email]<2"],
+    )
 
     builder = CondaBuilder(root=project)
     requirements = builder._get_requirements()
 
     assert requirements["run"] == [
-        'python >=3.9',
-        'requests ==2.31.0',
-        'flask',
-        'python-build',
-        'ascii-art',
-        'pydantic <2'
+        "python >=3.9",
+        "requests ==2.31.0",
+        "flask",
+        "python-build",
+        "ascii-art",
+        "pydantic <2",
     ]
 
     assert requirements["host"] == ["python >=3.9", "hatchling", "pip"]
@@ -56,13 +59,13 @@ def test_recipe(project_factory):
 def test_custom_channels(project_factory, mocker: MockerFixture):
     conda_build = mocker.patch("hatch_conda_build.plugin.conda_build")
 
-    target_config = dedent("""\
+    target_config = dedent(
+        """\
         [tool.hatch.build.targets.conda]
         channels = ["defaults", "bioconda"]
-    """)
-    project = project_factory(
-        conda_target_config=target_config
+    """
     )
+    project = project_factory(conda_target_config=target_config)
 
     builder = CondaBuilder(root=project)
     builder.build_standard(project / "dist")
@@ -84,13 +87,13 @@ def test_channels(project_factory, mocker: MockerFixture):
 def test_numpy_version(project_factory, mocker: MockerFixture):
     conda_build = mocker.patch("hatch_conda_build.plugin.conda_build")
 
-    target_config = dedent("""\
+    target_config = dedent(
+        """\
         [tool.hatch.build.targets.conda]
         default_numpy_version = "1.20"
-    """)
-    project = project_factory(
-        conda_target_config=target_config
+    """
     )
+    project = project_factory(conda_target_config=target_config)
 
     builder = CondaBuilder(root=project)
     builder.build_standard(project / "dist")
