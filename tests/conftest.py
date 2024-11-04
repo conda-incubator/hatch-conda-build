@@ -10,7 +10,7 @@ import pytest
 def plugin_dir():
     with TemporaryDirectory() as d:
         directory = Path(d, "plugin")
-        shutil.copytree(Path.cwd(), directory, ignore=shutil.ignore_patterns(".git"))
+        shutil.copytree(Path.cwd(), directory, ignore=shutil.ignore_patterns("env"))
 
         yield directory.resolve()
 
@@ -35,7 +35,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "project-a"
-version = "0.1.0"
+version = "{version}"
 description = "A description"
 dependencies = {json.dumps(dependencies)}
 
