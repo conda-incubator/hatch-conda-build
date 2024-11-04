@@ -18,11 +18,11 @@ build-backend = "hatchling.build"
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "hatch_conda_build/_version.py"
+version-file = "src/hatch_conda_build/_version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-  "/hatch_conda_build",
+  "src/hatch_conda_build",
   "/pyproject.toml",
   "/LICENSE",
   "/README.md",
