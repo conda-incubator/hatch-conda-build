@@ -26,7 +26,7 @@ def project_factory(tmp_path, plugin_dir):
         version: str = "0.1.0",
         dependencies: list[str] = ["requests"],
         requires_python: str = ">=3.8",
-        more_toml: Optional[str] = None
+        more_toml: Optional[str] = None,
     ) -> ProjectMetadata:
         project_dir = tmp_path / name
         project_dir.mkdir()

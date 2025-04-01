@@ -23,12 +23,9 @@ from grayskull.strategy.pypi import merge_pypi_sdist_metadata
 
 
 recipe_merger = Merger(
-    type_strategies=[
-        (dict, ["merge"]),
-        (list, ["append"])
-    ],
+    type_strategies=[(dict, ["merge"]), (list, ["append"])],
     fallback_strategies=["override"],
-    type_conflict_strategies=["override"]
+    type_conflict_strategies=["override"],
 )
 
 

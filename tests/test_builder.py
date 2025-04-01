@@ -63,7 +63,8 @@ def test_custom_channels(project_factory, mocker: MockerFixture):
         """\
         [tool.hatch.build.targets.conda]
         channels = ["defaults", "bioconda"]
-    """)
+    """
+    )
     project = project_factory(more_toml=target_config)
 
     builder = CondaBuilder(root=project)
@@ -90,7 +91,8 @@ def test_numpy_version(project_factory, mocker: MockerFixture):
         """\
         [tool.hatch.build.targets.conda]
         default_numpy_version = "1.20"
-    """)
+    """
+    )
     project = project_factory(more_toml=target_config)
 
     builder = CondaBuilder(root=project)
@@ -101,53 +103,49 @@ def test_numpy_version(project_factory, mocker: MockerFixture):
 
 def test_recipe_merge():
     recipe = {
-        "package": {
-            "name": "a-package",
-            "version": "0.1.0"
-        },
-
+        "package": {"name": "a-package", "version": "0.1.0"},
         "requirements": {
-            "host": [
-                "python >=3.8",
-                "pip"
-            ],
-            "run": [
-                "python >=3.8",
-                "requests"
-            ]
-        }
+            "host": ["python >=3.8", "pip"],
+            "run": ["python >=3.8", "requests"],
+        },
     }
 
     extras = {
         "requirements": {
             "build": ["{{ compiler('c') }}"],
-            "run": ["anaconda-anon-usage"]
+            "run": ["anaconda-anon-usage"],
         },
-        "test": {
-            "imports": ["a_package"]
-        }
+        "test": {"imports": ["a_package"]},
     }
 
     recipe_merger.merge(recipe, extras)
 
-    assert recipe["requirements"]["run"] == ["python >=3.8", "requests", "anaconda-anon-usage"]
+    assert recipe["requirements"]["run"] == [
+        "python >=3.8",
+        "requests",
+        "anaconda-anon-usage",
+    ]
     assert recipe["test"]["imports"] == ["a_package"]
 
 
 def test_recipe_extras(project_factory):
-    target_config = dedent("""\
+    target_config = dedent(
+        """\
         [tool.hatch.build.targets.conda.recipe]
         requirements.run = ["anaconda-anon-usage"]
         test.imports = ["a_package"]
-    """)
-    project = project_factory(
-        more_toml=target_config
+    """
     )
+    project = project_factory(more_toml=target_config)
 
     builder = CondaBuilder(root=project)
     recipe = builder._construct_recipe()
 
-    assert recipe["requirements"]["run"] == ["python >=3.8", "requests", "anaconda-anon-usage"]
+    assert recipe["requirements"]["run"] == [
+        "python >=3.8",
+        "requests",
+        "anaconda-anon-usage",
+    ]
     assert recipe["test"]["imports"] == ["a_package"]
 
 
@@ -163,4 +161,3 @@ def test_noarch_build(project_factory):
     assert (package.parent / "repodata.json").exists()
     assert package.parent.name == "noarch"
     assert package.parent.parent.name == "conda"
-
