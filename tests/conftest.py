@@ -26,7 +26,7 @@ def project_factory(tmp_path, plugin_dir):
         version: str = "0.1.0",
         dependencies: list[str] = ["requests"],
         requires_python: str = ">=3.8",
-        conda_target_config: Optional[str] = None,
+        more_toml: Optional[str] = None,
     ) -> ProjectMetadata:
         project_dir = tmp_path / name
         project_dir.mkdir()
@@ -49,8 +49,8 @@ def project_factory(tmp_path, plugin_dir):
             """
         )
 
-        if conda_target_config is not None:
-            toml += conda_target_config
+        if more_toml is not None:
+            toml += more_toml
 
         project_file = project_dir / "pyproject.toml"
         project_file.write_text(toml, encoding="utf-8")

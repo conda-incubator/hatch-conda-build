@@ -2,15 +2,16 @@
 name = "hatch-conda-build"
 description = "A Hatch plugin to enable building a conda package from your pyproject.toml without having to write a separate conda build recipe meta.yaml file"
 dynamic = ["version"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 readme = "README.md"
 dependencies = [
-  "hatchling",
-  "ruamel.yaml",
-  "requests",
-  "grayskull",
-  "conda-souschef >=2.2.3",
-  "build"
+   "hatchling",
+   "ruamel.yaml",
+   "requests",
+   "grayskull",
+   "conda-souschef >=2.2.3",
+   "build",
+   "deepmerge"
 ]
 
 [build-system]
