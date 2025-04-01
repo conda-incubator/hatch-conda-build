@@ -19,6 +19,7 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
+          miniconda-version: "latest"
           activate-environment: test
           python-version: "3.11"
 
