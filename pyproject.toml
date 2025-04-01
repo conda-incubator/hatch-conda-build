@@ -5,9 +5,12 @@ dynamic = ["version"]
 requires-python = ">=3.8"
 readme = "README.md"
 dependencies = [
-  "grayskull",
   "hatchling",
   "ruamel.yaml",
+  "requests",
+  "grayskull",
+  "conda-souschef >=2.2.3",
+  "build"
 ]
 
 [build-system]
@@ -35,10 +38,10 @@ conda = "hatch_conda_build.hooks"
 
 [project.optional-dependencies]
 dev = [
-  "build",
   "ruff",
   "black",
   "pytest",
+  "pytest-mock",
   "pytest-cov"
 ]
 

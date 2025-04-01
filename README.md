@@ -15,6 +15,9 @@ build-backend = "hatchling.build"
 Additionally `conda-build` must be in your current path when running a
 hatch build.
 
+`hatch-conda-build` uses [grayskull](https://github.com/conda/grayskull) to translate the requirements section of your `pyproject.toml`, which
+specifies dependencies on PyPi to appropriate conda package names.
+
 ### Options
 
 Additional builder configuration can be set in the following toml
@@ -25,12 +28,13 @@ header.
 ...
 ```
 
-Following table contains available customization of builder behavior. 
+Following table contains available customization of builder behavior.
 
-| Option                | Type      | Default         | Description                                 |
-|:----------------------|:----------|:----------------|:--------------------------------------------|
-| channels              | list[str] | ['conda-forge'] | Channels used for package build and testing |
-| default_numpy_version | str       | "1.22"          | Default numpy version for build             |
+| Option                | Type      | Default         | Description                                      |
+|:----------------------|:----------|:----------------|:-------------------------------------------------|
+| channels              | list[str] | ['conda-forge'] | Channels used for package build and testing      |
+| default_numpy_version | str       | None            | numpy version, otherwise use conda-build default |
+
 
 ## Building Conda Package
 
