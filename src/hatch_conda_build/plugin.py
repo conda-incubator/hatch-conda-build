@@ -82,7 +82,7 @@ def conda_build(
     package_name = (
         f"{meta_config['package']['name']}-"
         f"{meta_config['package']['version']}-"
-        f"py_{meta_config['build']['number']}.tar.bz2"
+        f"py_{meta_config['build']['number']}.conda"
     )
     return output_directory / "noarch" / package_name
 
