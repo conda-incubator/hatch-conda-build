@@ -6,7 +6,7 @@ import pathlib
 import collections
 import tempfile
 import subprocess
-from deepmerge import Merger
+from deepmerge.merger import Merger
 from pathlib import Path
 from typing import Optional, List
 
