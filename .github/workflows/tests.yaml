@@ -46,4 +46,6 @@ jobs:
 
       - name: Run tests
         shell: bash -el {0}
-        run: pytest -v
+        run: |
+          git config --global --add safe.directory ${{ github.workspace }}
+          pytest -vv
