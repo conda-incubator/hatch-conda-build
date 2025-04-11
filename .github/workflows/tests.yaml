@@ -31,7 +31,7 @@ jobs:
       - name: Install required packages
         shell: bash -el {0}
         run: |
-          conda install conda-build hatch pytest pip -c conda-forge
+          conda install git conda-build hatch pytest pip -c conda-forge
           pip install .[dev]
 
       - name: Conda info
