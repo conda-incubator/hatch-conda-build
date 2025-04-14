@@ -1,26 +1,40 @@
 name: Test
 
-on: push
+on:
+  pull_request:
+    branches:
+      - main
+  merge_group:
+  workflow_call:
 
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest] # , macos-latest]
-    name: Test
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.9", "3.10", "3.11", "3.12"]
+        exclude:
+           - os: "windows-latest"
+             python: "3.9"
     runs-on: ${{ matrix.os }}
+    name: Python ${{ matrix.python }} ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          fetch-tags: true
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
+          miniconda-version: "latest"
           activate-environment: test
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
 
       - name: Install required packages
         shell: bash -el {0}
         run: |
-          conda install conda-build hatch pytest pip -c conda-forge
+          conda install git conda-build hatch pytest pip -c conda-forge
           pip install .[dev]
 
       - name: Conda info
@@ -37,4 +51,6 @@ jobs:
 
       - name: Run tests
         shell: bash -el {0}
-        run: pytest -v
+        run: |
+          git config --global --add safe.directory ${{ github.workspace }}
+          pytest -vv

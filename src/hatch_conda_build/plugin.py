@@ -6,6 +6,7 @@ import pathlib
 import collections
 import tempfile
 import subprocess
+from deepmerge.merger import Merger
 from pathlib import Path
 from typing import Optional, List
 
@@ -19,6 +20,13 @@ from souschef.recipe import Recipe
 from grayskull.config import Configuration
 from grayskull.strategy.pypi import extract_requirements, normalize_requirements_list
 from grayskull.strategy.pypi import merge_pypi_sdist_metadata
+
+
+recipe_merger = Merger(
+    type_strategies=[(dict, ["merge"]), (list, ["append"])],
+    fallback_strategies=["override"],
+    type_conflict_strategies=["override"],
+)
 
 
 def normalize_host_packages(packages: typing.List[str]):
@@ -74,7 +82,7 @@ def conda_build(
     package_name = (
         f"{meta_config['package']['name']}-"
         f"{meta_config['package']['version']}-"
-        f"py_{meta_config['build']['number']}.tar.bz2"
+        f"py_{meta_config['build']['number']}.conda"
     )
     return output_directory / "noarch" / package_name
 
@@ -149,6 +157,10 @@ class CondaBuilder(BuilderInterface):
         conda_meta["about"]["summary"] = self.metadata.core_raw_metadata.get(
             "description"
         )
+
+        # merge extra keys and overrides
+        extras = self.target_config.get("recipe", {})
+        recipe_merger.merge(conda_meta, extras)
 
         return conda_meta
 
