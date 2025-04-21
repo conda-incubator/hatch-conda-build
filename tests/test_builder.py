@@ -157,7 +157,7 @@ def test_with_github_action_extra_metadata(monkeypatch, project_factory):
     """
     )
     project = project_factory(more_toml=target_config)
-    
+
     monkeypatch.setenv("GITHUB_SHA", "000000")
     monkeypatch.setenv("GITHUB_SERVER_URL", "http://example.com")
     monkeypatch.setenv("GITHUB_REPOSITORY", "repo")
@@ -179,7 +179,7 @@ def test_without_github_action_extra_metadata(monkeypatch, project_factory):
     """
     )
     project = project_factory(more_toml=target_config)
-    
+
     monkeypatch.setenv("GITHUB_SHA", "000000")
     monkeypatch.setenv("GITHUB_SERVER_URL", "http://example.com")
     monkeypatch.setenv("GITHUB_REPOSITORY", "repo")
@@ -212,7 +212,7 @@ def test_with_github_action_extra_metadata_missing_vars(project_factory):
 
 def test_default_without_github_action_extra_metadata(monkeypatch, project_factory):
     project = project_factory()
-    
+
     monkeypatch.setenv("GITHUB_SHA", "000000")
     monkeypatch.setenv("GITHUB_SERVER_URL", "http://example.com")
     monkeypatch.setenv("GITHUB_REPOSITORY", "repo")
