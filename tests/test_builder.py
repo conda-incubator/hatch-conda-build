@@ -149,6 +149,83 @@ def test_recipe_extras(project_factory):
     assert recipe["test"]["imports"] == ["a_package"]
 
 
+def test_with_github_action_extra_metadata(monkeypatch, project_factory):
+    target_config = dedent(
+        """\
+        [tool.hatch.build.targets.conda]
+        github_action_metadata = true
+    """
+    )
+    project = project_factory(more_toml=target_config)
+    
+    monkeypatch.setenv("GITHUB_SHA", "000000")
+    monkeypatch.setenv("GITHUB_SERVER_URL", "http://example.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "repo")
+    monkeypatch.setenv("GITHUB_RUN_ID", "123456")
+
+    builder = CondaBuilder(root=project)
+    recipe = builder._construct_recipe()
+
+    assert recipe["extra"]["sha"] == "000000"
+    assert recipe["extra"]["remote_url"] == "http://example.com/repo"
+    assert recipe["extra"]["flow_run_id"] == "123456"
+
+
+def test_without_github_action_extra_metadata(monkeypatch, project_factory):
+    target_config = dedent(
+        """\
+        [tool.hatch.build.targets.conda]
+        github_action_metadata = false
+    """
+    )
+    project = project_factory(more_toml=target_config)
+    
+    monkeypatch.setenv("GITHUB_SHA", "000000")
+    monkeypatch.setenv("GITHUB_SERVER_URL", "http://example.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "repo")
+    monkeypatch.setenv("GITHUB_RUN_ID", "123456")
+
+    builder = CondaBuilder(root=project)
+    recipe = builder._construct_recipe()
+
+    assert "sha" not in recipe["extra"]
+    assert "remote_url" not in recipe["extra"]
+    assert "flow_run_id" not in recipe["extra"]
+
+
+def test_with_github_action_extra_metadata_missing_vars(project_factory):
+    target_config = dedent(
+        """\
+        [tool.hatch.build.targets.conda]
+        github_action_metadata = false
+    """
+    )
+    project = project_factory(more_toml=target_config)
+
+    builder = CondaBuilder(root=project)
+    recipe = builder._construct_recipe()
+
+    assert "sha" not in recipe["extra"]
+    assert "remote_url" not in recipe["extra"]
+    assert "flow_run_id" not in recipe["extra"]
+
+
+def test_default_without_github_action_extra_metadata(monkeypatch, project_factory):
+    project = project_factory()
+    
+    monkeypatch.setenv("GITHUB_SHA", "000000")
+    monkeypatch.setenv("GITHUB_SERVER_URL", "http://example.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "repo")
+    monkeypatch.setenv("GITHUB_RUN_ID", "123456")
+
+    builder = CondaBuilder(root=project)
+    recipe = builder._construct_recipe()
+
+    assert "sha" not in recipe["extra"]
+    assert "remote_url" not in recipe["extra"]
+    assert "flow_run_id" not in recipe["extra"]
+
+
 @pytest.mark.slow()
 def test_noarch_build(project_factory):
     project = project_factory()
