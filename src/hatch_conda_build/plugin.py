@@ -164,7 +164,9 @@ class CondaBuilder(BuilderInterface):
             if "GITHUB_SHA" in os.environ:
                 conda_meta["extra"]["sha"] = os.environ["GITHUB_SHA"]
             if "GITHUB_SERVER_URL" in os.environ and "GITHUB_REPOSITORY" in os.environ:
-                conda_meta["extra"]["remote_url"] = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}"
+                conda_meta["extra"][
+                    "remote_url"
+                ] = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}"
             if "GITHUB_RUN_ID" in os.environ:
                 conda_meta["extra"]["flow_run_id"] = os.environ["GITHUB_RUN_ID"]
 
