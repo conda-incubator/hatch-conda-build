@@ -149,9 +149,7 @@ class CondaBuilder(BuilderInterface):
         conda_meta["requirements"] = self._get_requirements()
 
         # test
-        conda_meta["test"] = {
-            "source_files": ["."]
-        }
+        conda_meta["test"] = {"source_files": ["."]}
 
         # about
         conda_meta["about"]["home"] = self.metadata.core_raw_metadata.get(
