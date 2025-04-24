@@ -1,11 +1,12 @@
-import json
-import shutil
-import sys
-import typing
-import pathlib
 import collections
-import tempfile
+import json
+import os
+import pathlib
+import shutil
 import subprocess
+import sys
+import tempfile
+import typing
 from deepmerge.merger import Merger
 from pathlib import Path
 from typing import Optional, List
@@ -157,6 +158,17 @@ class CondaBuilder(BuilderInterface):
         conda_meta["about"]["summary"] = self.metadata.core_raw_metadata.get(
             "description"
         )
+
+        github_action_metadata = self.target_config.get("github_action_metadata", False)
+        if github_action_metadata:
+            if "GITHUB_SHA" in os.environ:
+                conda_meta["extra"]["sha"] = os.environ["GITHUB_SHA"]
+            if "GITHUB_SERVER_URL" in os.environ and "GITHUB_REPOSITORY" in os.environ:
+                conda_meta["extra"][
+                    "remote_url"
+                ] = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}"
+            if "GITHUB_RUN_ID" in os.environ:
+                conda_meta["extra"]["flow_run_id"] = os.environ["GITHUB_RUN_ID"]
 
         # merge extra keys and overrides
         extras = self.target_config.get("recipe", {})

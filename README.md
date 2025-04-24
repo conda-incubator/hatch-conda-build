@@ -37,6 +37,7 @@ conda channel and can be used to install the package.
 
 ```shell
 $ conda install -c ./dist/conda <package-name>
+...
 ```
 
 ## Conda-build Options
@@ -51,10 +52,20 @@ header.
 
 Following table contains available customization of builder behavior.
 
-| Option                | Type      | Default         | Description                                      |
-|:----------------------|:----------|:----------------|:-------------------------------------------------|
-| channels              | list[str] | ['conda-forge'] | Channels used for package build and testing      |
-| default_numpy_version | str       | None            | numpy version, otherwise use conda-build default |
+| Option                 | Type      | Default         | Description                                      |
+|:-----------------------|:----------|:----------------|:-------------------------------------------------|
+| channels               | list[str] | ['conda-forge'] | Channels used for package build and testing      |
+| default_numpy_version  | str       | None            | numpy version, otherwise use conda-build default |
+| github_action_metadata | bool      | false           | Include extra metadata into recipe from Github runner environment variables|
+
+When `github_action_metadata` is True and the [Github runner environment variables](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables) are present, the follow metadata is added to the 
+`extra` section of the recipe:
+
+| Variable(s)                          | Field         | Value           |
+|:-------------------------------------|:--------------|:----------------|
+| GITHUB_SHA                           | `sha`         | `${GITHUB_SHA}` |
+| GITHUB_SERVER_URL<br>GITHUB_REPOSITORY | `remote_url`  | `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}` |
+| GITHUB_RUN_ID                        | `flow_run_id` | `${GITHUB_RUN_ID}` |
 
 ### Modifying the generated recipe
 
