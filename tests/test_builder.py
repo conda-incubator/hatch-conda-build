@@ -226,6 +226,15 @@ def test_default_without_github_action_extra_metadata(monkeypatch, project_facto
     assert "flow_run_id" not in recipe["extra"]
 
 
+def test_source_files_for_testing(project_factory):
+    project = project_factory()
+
+    builder = CondaBuilder(root=project)
+    recipe = builder._construct_recipe()
+
+    assert recipe.get("test", {}).get("source_files", []) == ["."]
+
+
 @pytest.mark.slow()
 def test_noarch_build(project_factory):
     project = project_factory()
