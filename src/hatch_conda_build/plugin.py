@@ -22,6 +22,7 @@ from grayskull.config import Configuration
 from grayskull.strategy.pypi import extract_requirements, normalize_requirements_list
 from grayskull.strategy.pypi import merge_pypi_sdist_metadata
 
+from ruamel.yaml import YAML
 
 recipe_merger = Merger(
     type_strategies=[(dict, ["merge"]), (list, ["append"])],
@@ -53,7 +54,8 @@ def conda_build(
 ):
     conda_meta_filename = build_directory / "meta.yaml"
     with conda_meta_filename.open("w") as f:
-        json.dump(meta_config, f)
+        yaml = YAML()
+        yaml.dump(dict(meta_config), f)
 
     command = [
         "conda",
